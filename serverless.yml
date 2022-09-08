@@ -1,0 +1,99 @@
+service: SpeedrunnersTracker
+
+frameworkVersion: '3'
+unresolvedVariablesNotificationMode: error
+useDotenv: true
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-plugin-optimize
+  - serverless-offline
+  - ./serverless/dynamodb-local
+  - serverless-domain-manager
+
+provider:
+  name: aws
+  stackName: speedrunners-tracker-${opt:stage, 'development'}
+  runtime: nodejs14.x
+  stage: ${opt:stage, 'development'}
+  region: ${opt:region, 'sa-east-1'}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - arn:aws:dynamodb:${opt:region, 'sa-east-1'}:*:table/speedrunners-tracker-${self:provider.stage}*
+  iam:
+    deploymentRole: ${env:CLOUDFORMATION_ROLE, ''}
+  environment:
+    ENVIRONMENT: ${opt:stage, 'local'}
+    BASE_URL: ${self:custom.endpoints.${self:provider.stage}}
+    ACCESS_KEY_ID: ${env:ACCESS_KEY_ID}
+    SECRET_ACCESS_KEY: ${env:SECRET_ACCESS_KEY}
+functions:
+  root:
+    handler: src/lambda.handler
+    events:
+      - http:
+          method: any
+          path: /{any+}
+custom:
+  customDomain:
+    domainName: speedrunners.aws.hugo.dev.br
+    endpointType: regional
+    apiType: rest
+    createRoute53Record: false
+  endpoints:
+    local: http://localhost:3000
+    development: https://${self:custom.customDomain.domainName}
+    production: https://${self:custom.customDomain.domainName}
+  dynamodbLocal:
+    tables: serverless/tables.json
+
+resources: # CloudFormation template syntax
+  Resources:
+    ublogTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: speedrunners-tracker-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: GSI1PK
+            AttributeType: S
+          - AttributeName: GSI1SK
+            AttributeType: S
+          - AttributeName: GSI2PK
+            AttributeType: S
+          - AttributeName: GSI2SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            KeySchema:
+              - AttributeName: GSI1PK
+                KeyType: HASH
+              - AttributeName: GSI1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: GSI2
+            KeySchema:
+              - AttributeName: GSI2PK
+                KeyType: HASH
+              - AttributeName: GSI2SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
