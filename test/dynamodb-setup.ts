@@ -1,6 +1,6 @@
-import * as fs from 'fs';
 import * as AWS from 'aws-sdk';
 import * as ddb from 'dynamodb-localhost';
+import * as fs from 'fs';
 
 const installPath = process.env.DYNAMODB_LOCAL_INSTALL_PATH || '.dynamodb';
 

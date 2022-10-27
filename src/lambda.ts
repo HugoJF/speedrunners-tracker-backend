@@ -1,11 +1,10 @@
-import { NestFactory, Reflector } from '@nestjs/core';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import serverlessExpress from '@vendia/serverless-express';
 import { Context, Handler } from 'aws-lambda';
 import express from 'express';
-
+import { NestFactory } from '@nestjs/core';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import serverlessExpress from '@vendia/serverless-express';
 import { AppModule } from './app.module';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { setup } from './setup';
 
 let cachedServer: Handler;
 
@@ -17,24 +16,7 @@ async function bootstrap() {
       new ExpressAdapter(expressApp),
     );
 
-    nestApp.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-      }),
-    );
-
-    // Exclude prefixes are used to avoid @Exclude removing properties during
-    // plainToInstance, causing getters to use undefined values.
-    // This interceptor is only used during serialization (controller return value)
-    nestApp.useGlobalInterceptors(
-      new ClassSerializerInterceptor(nestApp.get(Reflector), {
-        excludePrefixes: ['_'],
-      }),
-    );
-
-    nestApp.enableCors();
-
-    await nestApp.init();
+    await setup(nestApp).init();
 
     cachedServer = serverlessExpress({ app: expressApp });
   }

@@ -1,5 +1,6 @@
 import { Entity } from 'electrodb';
-import { client, table } from './dynamodb';
+import { ulid } from 'ulid';
+import { client, table } from '../dynamodb';
 
 export const MatchRepository = new Entity(
   {
@@ -9,36 +10,47 @@ export const MatchRepository = new Entity(
       service: 'speedrunners-tracker-backend',
     },
     attributes: {
+      id: {
+        type: 'string',
+        default: () => ulid(),
+      },
+      sprint_id: {
+        type: 'string',
+        required: true,
+      },
       map: {
         type: 'string',
         required: true,
       },
-      denerd_score: {
+      p1_score: {
         type: 'number',
         required: true,
       },
-      chase_score: {
+      p2_score: {
         type: 'number',
         required: true,
       },
-      date: {
+      created_at: {
         type: 'string',
-        required: true,
+        set: () => new Date().toISOString(),
+        readOnly: true,
       },
-      time: {
+      updated_at: {
         type: 'string',
-        required: true,
+        watch: '*',
+        set: () => new Date().toISOString(),
+        readOnly: true,
       },
     },
     indexes: {
-      byDate: {
+      bySprintId: {
         pk: {
           field: 'PK',
-          composite: ['date'],
+          composite: ['sprint_id'],
         },
         sk: {
           field: 'SK',
-          composite: ['time'],
+          composite: ['id'],
         },
       },
       byMap: {
@@ -49,7 +61,7 @@ export const MatchRepository = new Entity(
         },
         sk: {
           field: 'GSI1SK',
-          composite: ['date', 'time'],
+          composite: ['id'],
         },
       },
       all: {
@@ -61,7 +73,7 @@ export const MatchRepository = new Entity(
         },
         sk: {
           field: 'GSI2SK',
-          composite: ['date', 'time'],
+          composite: ['id'],
         },
       },
     },

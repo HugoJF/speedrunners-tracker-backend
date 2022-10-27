@@ -1,28 +1,13 @@
 import { Maps } from '../types';
-import { Expose } from 'class-transformer';
 
 export class Match {
+  id: string;
+  sprint_id: string;
   map: Maps;
-  denerd_score: number;
-  chase_score: number;
 
-  private _date: string;
-  set date(date) {
-    this._date = date;
-  }
+  p1_score: number;
+  p2_score: number;
 
-  private _time: string;
-  set time(time) {
-    this._time = time;
-  }
-
-  @Expose()
-  public get id(): string {
-    return `${this._date}T${this._time}Z`;
-  }
-
-  @Expose()
-  public get created_at(): string {
-    return `${this._date}T${this._time}Z`;
-  }
+  updated_at: string;
+  created_at: string;
 }

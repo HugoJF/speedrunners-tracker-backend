@@ -19,8 +19,6 @@ const nonLocalOptions: DynamoDBOptions = {
 };
 
 const localEnvironment = process.env.ENVIRONMENT === 'local';
-const extraOptions = localEnvironment ? localOptions : nonLocalOptions;
+const options = localEnvironment ? localOptions : nonLocalOptions;
 
-export const client = new DynamoDB.DocumentClient({
-  ...extraOptions,
-});
+export const client = new DynamoDB.DocumentClient(options);

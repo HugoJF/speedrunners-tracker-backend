@@ -1,25 +1,18 @@
-import { maps, Maps } from '../types';
-import { IsDateString, IsIn, Max, Min, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsIn, IsString, Max, Min } from 'class-validator';
+import { Maps, maps } from '../types';
 
-class Match {
+export class MatchCreateDto {
+  @IsString()
+  sprint_id: string;
+
   @IsIn(Object.keys(maps))
   map: Maps;
 
   @Min(0)
   @Max(3)
-  denerd_score: number;
+  p1_score: number;
 
   @Min(0)
   @Max(3)
-  chase_score: number;
-
-  @IsDateString()
-  created_at?: string;
-}
-
-export class MatchCreateDto {
-  @ValidateNested()
-  @Type(() => Match)
-  match: Match;
+  p2_score: number;
 }

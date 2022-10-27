@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { MatchController } from './match.controller';
-import { MatchService } from './match.service';
-import { DateController } from './date.controller';
-import { DateService } from './date.service';
+import { MatchController } from './controllers/match.controller';
+import { SprintController } from './controllers/sprint.controller';
+import { MatchService } from './services/match.service';
+import { SprintService } from './services/sprint.service';
 
 @Module({
   imports: [],
-  controllers: [DateController, MatchController],
-  providers: [DateService, MatchService],
+  controllers: [SprintController, MatchController],
+  providers: [SprintService, MatchService],
 })
 export class AppModule {}
